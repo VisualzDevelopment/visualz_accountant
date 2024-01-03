@@ -1,5 +1,12 @@
 local companyRequests = {}
 
+if GetCurrentResourceName() ~= "visualz_accountant" then
+    print("[" ..
+    GetCurrentResourceName() ..
+    "] ^1WARNING^7: This resource is not named 'visualz_accountant' but '" .. GetCurrentResourceName() .. "'")
+    StopResource(GetCurrentResourceName())
+end
+
 CreateThread(function()
     while true do
         Wait(1000)
@@ -38,9 +45,11 @@ lib.callback.register('visualz_accountant:getPlayersInformation', function(sourc
     for i = #players, 1, -1 do
         local xPlayer = ESX.GetPlayerFromId(players[i])
         if xPlayer then
-            local doesCompanyExist = MySQL.single.await('SELECT `identifier`, `name` FROM `visualz_accountant_company` WHERE `identifier` = ? AND `accountant` = ? AND `deleted` = 0 LIMIT 1', {
-                xPlayer.identifier, accountantJob
-            })
+            local doesCompanyExist = MySQL.single.await(
+                'SELECT `identifier`, `name` FROM `visualz_accountant_company` WHERE `identifier` = ? AND `accountant` = ? AND `deleted` = 0 LIMIT 1',
+                {
+                    xPlayer.identifier, accountantJob
+                })
 
             table.insert(playersInfo, {
                 source = xPlayer.source,
@@ -51,9 +60,11 @@ lib.callback.register('visualz_accountant:getPlayersInformation', function(sourc
         end
     end
 
-    local doesCompanyExist = MySQL.single.await('SELECT `identifier`, `name` FROM `visualz_accountant_company` WHERE `identifier` = ? AND `accountant` = ? AND `deleted` = 0 LIMIT 1', {
-        ESX.GetPlayerFromId(source).identifier, accountantJob
-    })
+    local doesCompanyExist = MySQL.single.await(
+        'SELECT `identifier`, `name` FROM `visualz_accountant_company` WHERE `identifier` = ? AND `accountant` = ? AND `deleted` = 0 LIMIT 1',
+        {
+            ESX.GetPlayerFromId(source).identifier, accountantJob
+        })
 
     table.insert(playersInfo, {
         source = source,
@@ -90,9 +101,10 @@ lib.callback.register('visualz_accountant:searchCompanyByName', function(source,
         return {}
     end
 
-    local companies = MySQL.rawExecute.await('SELECT * FROM `visualz_accountant_company` WHERE `name` LIKE ? AND `accountant` = ?', {
-        '%' .. name .. '%', accountantJob
-    })
+    local companies = MySQL.rawExecute.await(
+        'SELECT * FROM `visualz_accountant_company` WHERE `name` LIKE ? AND `accountant` = ?', {
+            '%' .. name .. '%', accountantJob
+        })
 
     return FormatCompanies(companies)
 end)
@@ -106,13 +118,15 @@ function FormatCompanies(companies)
             goto continue
         end
 
-        local playerName = MySQL.single.await('SELECT `firstname`, `lastname` FROM `users` WHERE `identifier` = ? LIMIT 1', {
-            formattedCompanies[i].identifier
-        })
+        local playerName = MySQL.single.await(
+            'SELECT `firstname`, `lastname` FROM `users` WHERE `identifier` = ? LIMIT 1', {
+                formattedCompanies[i].identifier
+            })
 
-        local accountantName = MySQL.single.await('SELECT `firstname`, `lastname` FROM `users` WHERE `identifier` = ? LIMIT 1', {
-            formattedCompanies[i].accountant_identifier
-        })
+        local accountantName = MySQL.single.await(
+            'SELECT `firstname`, `lastname` FROM `users` WHERE `identifier` = ? LIMIT 1', {
+                formattedCompanies[i].accountant_identifier
+            })
 
         local created_at_number = tonumber(formattedCompanies[i].created_at)
 
@@ -139,14 +153,16 @@ lib.callback.register("visualz_accountant:getCompanyBookKeepingProcessList", fun
         return {}
     end
 
-    local bookKeepingProcessList = MySQL.query.await('SELECT * FROM visualz_accountant_book_keeping WHERE company_id = ? AND accountant = ? AND completed = 0', {
-        companyId, accountantJob
-    })
+    local bookKeepingProcessList = MySQL.query.await(
+        'SELECT * FROM visualz_accountant_book_keeping WHERE company_id = ? AND accountant = ? AND completed = 0', {
+            companyId, accountantJob
+        })
 
     for i = #bookKeepingProcessList, 1, -1 do
-        local accountantName = MySQL.single.await('SELECT `firstname`, `lastname` FROM `users` WHERE `identifier` = ? LIMIT 1', {
-            bookKeepingProcessList[i].accountant_identifier
-        })
+        local accountantName = MySQL.single.await(
+            'SELECT `firstname`, `lastname` FROM `users` WHERE `identifier` = ? LIMIT 1', {
+                bookKeepingProcessList[i].accountant_identifier
+            })
 
         local created_at_number = tonumber(bookKeepingProcessList[i].created_at)
         local ending_at_number = tonumber(bookKeepingProcessList[i].ending_at)
@@ -179,14 +195,16 @@ lib.callback.register("visualz_accountant:getCompanyBookKeepings", function(sour
         return {}
     end
 
-    local bookKeepingProcessList = MySQL.query.await('SELECT * FROM visualz_accountant_book_keeping WHERE `company_id` = ? AND `accountant` = ? AND completed = 1', {
-        companyId, accountantJob
-    })
+    local bookKeepingProcessList = MySQL.query.await(
+        'SELECT * FROM visualz_accountant_book_keeping WHERE `company_id` = ? AND `accountant` = ? AND completed = 1', {
+            companyId, accountantJob
+        })
 
     for i = #bookKeepingProcessList, 1, -1 do
-        local accountantName = MySQL.single.await('SELECT `firstname`, `lastname` FROM `users` WHERE `identifier` = ? LIMIT 1', {
-            bookKeepingProcessList[i].accountant_identifier
-        })
+        local accountantName = MySQL.single.await(
+            'SELECT `firstname`, `lastname` FROM `users` WHERE `identifier` = ? LIMIT 1', {
+                bookKeepingProcessList[i].accountant_identifier
+            })
 
         local created_at_number = tonumber(bookKeepingProcessList[i].created_at)
         local ending_at_number = tonumber(bookKeepingProcessList[i].ending_at)
@@ -251,17 +269,19 @@ lib.callback.register("visualz_accountant:editCompany", function(source, company
         return { type = 'error', description = "Procenten skal være mellem " .. min .. " og " .. max .. "%" }
     end
 
-    local doesCompanyExist = MySQL.single.await('SELECT * FROM `visualz_accountant_company` WHERE `accountant` = ? AND id = ? AND deleted = 0 LIMIT 1', {
-        accountantJob, companyId
-    })
+    local doesCompanyExist = MySQL.single.await(
+        'SELECT * FROM `visualz_accountant_company` WHERE `accountant` = ? AND id = ? AND deleted = 0 LIMIT 1', {
+            accountantJob, companyId
+        })
 
     if not doesCompanyExist then
         return { type = 'error', description = 'Virksomheden findes ikke' }
     end
 
-    local updateCompanyQuery = MySQL.update.await('UPDATE `visualz_accountant_company` SET `name` = ?, `percentage` = ? WHERE `id` = ? AND `accountant` = ?', {
-        companyName, parsedCompanyPercentage, companyId, accountantJob
-    })
+    local updateCompanyQuery = MySQL.update.await(
+        'UPDATE `visualz_accountant_company` SET `name` = ?, `percentage` = ? WHERE `id` = ? AND `accountant` = ?', {
+            companyName, parsedCompanyPercentage, companyId, accountantJob
+        })
 
     if not updateCompanyQuery then
         return { type = 'error', description = 'Der skete en fejl' }
@@ -284,16 +304,15 @@ lib.callback.register("visualz_accountant:editCompany", function(source, company
 
         "**Gamle virksomheds navn:** " .. doesCompanyExist.name .. "\n" ..
         "**Nyt virksomheds navn:** " .. companyName .. "\n\n" ..
-
         "**Virksomheds CVR:** " .. doesCompanyExist.cvr .. "\n\n" ..
-
         "**Gamle procent:** " .. ESX.Math.Round(doesCompanyExist.percentage, 0) .. "\n" ..
         "**Ny procent:** " .. parsedCompanyPercentage .. "\n\n" ..
 
         "**Revisor:** " .. xPlayer.getIdentifier() .. "\n" ..
         "**Kunde:** " .. doesCompanyExist.identifier .. "\n"
 
-    SendLog(Logs["EditCompany"], 2829617, "Rediger virksomhed", message, "Visualz Development | Visualz.dk | " .. os.date("%d/%m/%Y %H:%M:%S"))
+    SendLog(Logs["EditCompany"], 2829617, "Rediger virksomhed", message,
+        "Visualz Development | Visualz.dk | " .. os.date("%d/%m/%Y %H:%M:%S"))
 
     return { type = 'success', description = 'Virksomheden er blevet opdateret' }
 end)
@@ -307,17 +326,19 @@ lib.callback.register("visualz_accountant:deleteCompany", function(source, compa
         return { type = 'error', description = 'Du har ikke adgang til denne funktion' }
     end
 
-    local doesCompanyExist = MySQL.single.await('SELECT * FROM `visualz_accountant_company` WHERE `id` = ? AND `accountant` = ? AND `deleted` = 0 LIMIT 1', {
-        companyId, accountantJob
-    })
+    local doesCompanyExist = MySQL.single.await(
+        'SELECT * FROM `visualz_accountant_company` WHERE `id` = ? AND `accountant` = ? AND `deleted` = 0 LIMIT 1', {
+            companyId, accountantJob
+        })
 
     if not doesCompanyExist then
         return { type = 'error', description = 'Virksomheden findes ikke' }
     end
 
-    local didCompanyDelete = MySQL.update.await('UPDATE `visualz_accountant_company` SET `deleted` = ? WHERE `id` = ? AND `accountant` = ?', {
-        1, companyId, accountantJob
-    })
+    local didCompanyDelete = MySQL.update.await(
+        'UPDATE `visualz_accountant_company` SET `deleted` = ? WHERE `id` = ? AND `accountant` = ?', {
+            1, companyId, accountantJob
+        })
 
     if not didCompanyDelete then
         return { type = 'error', description = 'Der skete en fejl' }
@@ -341,11 +362,11 @@ lib.callback.register("visualz_accountant:deleteCompany", function(source, compa
         "**Virksomheds navn:** " .. doesCompanyExist.name .. "\n" ..
         "**Virksomheds CVR:** " .. doesCompanyExist.cvr .. "\n" ..
         "**Virksomheds procent:** " .. ESX.Math.Round(doesCompanyExist.percentage, 0) .. "\n\n" ..
-
         "**Revisor:** " .. xPlayer.getIdentifier() .. "\n" ..
         "**Kunde:** " .. doesCompanyExist.identifier .. "\n"
 
-    SendLog(Logs["DeleteCompany"], 2829617, "Slettet virksomhed", message, "Visualz Development | Visualz.dk | " .. os.date("%d/%m/%Y %H:%M:%S"))
+    SendLog(Logs["DeleteCompany"], 2829617, "Slettet virksomhed", message,
+        "Visualz Development | Visualz.dk | " .. os.date("%d/%m/%Y %H:%M:%S"))
 
     return { type = 'success', description = 'Virksomheden er blevet slettet' }
 end)
@@ -358,9 +379,10 @@ lib.callback.register("visualz_accountant:payOutBookKeeping", function(source, b
         return { type = 'error', description = 'Du har ikke adgang til denne funktion' }
     end
 
-    local doesCompanyExist = MySQL.single.await('SELECT * FROM `visualz_accountant_company` WHERE `accountant` = ? AND `deleted` = 0 LIMIT 1', {
-        accountantJob
-    })
+    local doesCompanyExist = MySQL.single.await(
+        'SELECT * FROM `visualz_accountant_company` WHERE `accountant` = ? AND `deleted` = 0 LIMIT 1', {
+            accountantJob
+        })
     if not doesCompanyExist then
         return { type = 'error', description = 'Virksomheden findes ikke' }
     end
@@ -377,9 +399,11 @@ lib.callback.register("visualz_accountant:payOutBookKeeping", function(source, b
         return { type = 'error', description = 'Der skete en fejl' }
     end
 
-    local bookKeeping = MySQL.single.await('SELECT * FROM `visualz_accountant_book_keeping` WHERE `id` = ? AND `accountant` = ? AND completed = 0 LIMIT 1', {
-        bookKeepingId, accountantJob
-    })
+    local bookKeeping = MySQL.single.await(
+        'SELECT * FROM `visualz_accountant_book_keeping` WHERE `id` = ? AND `accountant` = ? AND completed = 0 LIMIT 1',
+        {
+            bookKeepingId, accountantJob
+        })
     if not bookKeeping then
         return { type = 'error', description = 'Bogføringen findes ikke' }
     end
@@ -400,9 +424,10 @@ lib.callback.register("visualz_accountant:payOutBookKeeping", function(source, b
         return { type = 'error', description = 'Bogføringen er ikke færdig endnu' }
     end
 
-    local companyOwnerIdentifier = MySQL.single.await('SELECT `identifier` FROM `visualz_accountant_company` WHERE `id` = ? LIMIT 1', {
-        bookKeeping.company_id
-    })
+    local companyOwnerIdentifier = MySQL.single.await(
+        'SELECT `identifier` FROM `visualz_accountant_company` WHERE `id` = ? LIMIT 1', {
+            bookKeeping.company_id
+        })
 
     if not companyOwnerIdentifier then
         return { type = 'error', description = 'Der skete en fejl' }
@@ -444,22 +469,19 @@ lib.callback.register("visualz_accountant:payOutBookKeeping", function(source, b
     local message =
         "**Revisor navn:** " .. xPlayer.getName() .. "\n" ..
         "**Kunde navn:** " .. companyOwner.getName() .. "\n\n" ..
-
         "**Virksomheds navn:** " .. doesCompanyExist.name .. "\n" ..
         "**Virksomheds CVR:** " .. doesCompanyExist.cvr .. "\n" ..
         "**Virksomheds procent:** " .. doesCompanyExist.percentage .. "\n\n" ..
-
         "**Bogføring:** " .. ESX.Math.Round(bookKeeping.amount_inserted, 0) .. "\n" ..
         "**Udbetaling:** " .. ESX.Math.Round(bookKeeping.amount_receiving, 0) .. "\n" ..
         "**Revisor udbetaling:** " .. ESX.Math.Round(accountantPayout, 0) .. "\n\n" ..
-
         "**Indsat d.** " .. os.date("%d/%m/%Y %H:%M:%S", math.floor(created_at_number) / 1000) .. "\n" ..
         "**Afsluttet d.** " .. os.date("%d/%m/%Y %H:%M:%S", ending_at) .. "\n\n" ..
-
         "**Revisor:** " .. xPlayer.getIdentifier() .. "\n" ..
         "**Kunde:** " .. doesCompanyExist.identifier .. "\n"
 
-    SendLog(Logs["PayoutBookKeeping"], 2829617, "Udbetal bogføring", message, "Visualz Development | Visualz.dk | " .. os.date("%d/%m/%Y %H:%M:%S"))
+    SendLog(Logs["PayoutBookKeeping"], 2829617, "Udbetal bogføring", message,
+        "Visualz Development | Visualz.dk | " .. os.date("%d/%m/%Y %H:%M:%S"))
 
     TriggerClientEvent("ox_lib:notify", companyOwner.source, {
         description = 'Du har modtaget ' .. bookKeeping.amount_receiving .. ' kr,- fra din bogføring',
@@ -467,7 +489,11 @@ lib.callback.register("visualz_accountant:payOutBookKeeping", function(source, b
         icon = 'money-bill',
     })
 
-    return { type = 'success', description = 'Du har udbetalt ' .. bookKeeping.amount_receiving .. ' kr,- til ' .. companyOwner.getName() }
+    return {
+        type = 'success',
+        description = 'Du har udbetalt ' ..
+            bookKeeping.amount_receiving .. ' kr,- til ' .. companyOwner.getName()
+    }
 end)
 
 lib.callback.register("visualz_accountant:createCompany", function(source, companyOwnerId)
@@ -492,9 +518,11 @@ lib.callback.register("visualz_accountant:createCompany", function(source, compa
         return { type = 'error', description = 'Spilleren har allerede en forespørgsel' }
     end
 
-    local doesCompanyExist = MySQL.single.await('SELECT `identifier` FROM `visualz_accountant_company` WHERE `identifier` = ? AND `accountant` = ? AND `deleted` = 0 LIMIT 1', {
-        tPlayer.identifier, accountantJob
-    })
+    local doesCompanyExist = MySQL.single.await(
+        'SELECT `identifier` FROM `visualz_accountant_company` WHERE `identifier` = ? AND `accountant` = ? AND `deleted` = 0 LIMIT 1',
+        {
+            tPlayer.identifier, accountantJob
+        })
 
     if doesCompanyExist then
         return { type = 'error', description = 'Spilleren har allerede en virksomhed' }
@@ -575,7 +603,8 @@ lib.callback.register("visualz_accountant:createCompany", function(source, compa
         timeout = 60,
     }
 
-    local response, percentage = lib.callback.await("visualz_accountant:companyDataResponse", xPlayer.source, tPlayer.getName(), companyName)
+    local response, percentage = lib.callback.await("visualz_accountant:companyDataResponse", xPlayer.source,
+        tPlayer.getName(), companyName)
 
     if not response then
         companyRequests[tPlayer.source] = nil
@@ -604,9 +633,10 @@ lib.callback.register("visualz_accountant:createCompany", function(source, compa
 
     local randomEightDigitNumber = math.random(10000000, 99999999)
 
-    local doesCompanyExistWithCVR = MySQL.single.await('SELECT `identifier` FROM `visualz_accountant_company` WHERE `cvr` = ? AND `deleted` = 0 LIMIT 1', {
-        randomEightDigitNumber
-    })
+    local doesCompanyExistWithCVR = MySQL.single.await(
+        'SELECT `identifier` FROM `visualz_accountant_company` WHERE `cvr` = ? AND `deleted` = 0 LIMIT 1', {
+            randomEightDigitNumber
+        })
 
     if doesCompanyExistWithCVR then
         companyRequests[tPlayer.source] = nil
@@ -671,9 +701,12 @@ lib.callback.register("visualz_accountant:createCompany", function(source, compa
         return { type = 'error', description = "Procenten skal være mellem " .. min .. " og " .. max .. "%" }
     end
 
-    local createCompanyQuery = MySQL.insert.await('INSERT INTO `visualz_accountant_company` (identifier, name, cvr, percentage, accountant_identifier, accountant) VALUES (?, ?, ?, ?, ?, ?)', {
-        tPlayer.identifier, companyName, randomEightDigitNumber, parsedCompanyPercentage, xPlayer.identifier, accountantJob
-    })
+    local createCompanyQuery = MySQL.insert.await(
+        'INSERT INTO `visualz_accountant_company` (identifier, name, cvr, percentage, accountant_identifier, accountant) VALUES (?, ?, ?, ?, ?, ?)',
+        {
+            tPlayer.identifier, companyName, randomEightDigitNumber, parsedCompanyPercentage, xPlayer.identifier,
+            accountantJob
+        })
 
     if not createCompanyQuery then
         companyRequests[tPlayer.source] = nil
@@ -707,11 +740,11 @@ lib.callback.register("visualz_accountant:createCompany", function(source, compa
         "**Virksomheds navn:** " .. companyName .. "\n" ..
         "**Virksomheds CVR:** " .. randomEightDigitNumber .. "\n" ..
         "**Virksomheds procent:** " .. parsedCompanyPercentage .. "\n\n" ..
-
         "**Revisor:** " .. xPlayer.getIdentifier() .. "\n" ..
         "**Kunde:** " .. tPlayer.getIdentifier() .. "\n"
 
-    SendLog(Logs["CreateCompany"], 2829617, "Oprettet virksomhed", message, "Visualz Development | Visualz.dk | " .. os.date("%d/%m/%Y %H:%M:%S"))
+    SendLog(Logs["CreateCompany"], 2829617, "Oprettet virksomhed", message,
+        "Visualz Development | Visualz.dk | " .. os.date("%d/%m/%Y %H:%M:%S"))
 
     return {
         id = 'request_data',
@@ -730,9 +763,11 @@ lib.callback.register("visualz_accountant:createBookKeeping", function(source, c
         return { type = 'error', description = 'Du har ikke adgang til denne funktion' }
     end
 
-    local tPlayerIdentifier = MySQL.single.await('SELECT `identifier` FROM `visualz_accountant_company` WHERE `id` = ? AND `accountant` = ? AND `deleted` = 0 LIMIT 1', {
-        companyId, accountantJob
-    })
+    local tPlayerIdentifier = MySQL.single.await(
+        'SELECT `identifier` FROM `visualz_accountant_company` WHERE `id` = ? AND `accountant` = ? AND `deleted` = 0 LIMIT 1',
+        {
+            companyId, accountantJob
+        })
 
     if not tPlayerIdentifier then
         return { type = 'error', description = 'Kunden er for langt væk eller findes ikke' }
@@ -760,9 +795,11 @@ lib.callback.register("visualz_accountant:createBookKeeping", function(source, c
         return { type = 'error', description = 'Spilleren har allerede en forespørgsel' }
     end
 
-    local doesCompanyExist = MySQL.single.await('SELECT * FROM `visualz_accountant_company` WHERE `identifier` = ? AND `accountant` = ? AND `deleted` = 0 LIMIT 1', {
-        tPlayer.identifier, accountantJob
-    })
+    local doesCompanyExist = MySQL.single.await(
+        'SELECT * FROM `visualz_accountant_company` WHERE `identifier` = ? AND `accountant` = ? AND `deleted` = 0 LIMIT 1',
+        {
+            tPlayer.identifier, accountantJob
+        })
 
     if not doesCompanyExist then
         return { type = 'error', description = 'Spilleren har ikke en virksomhed' }
@@ -793,7 +830,8 @@ lib.callback.register("visualz_accountant:createBookKeeping", function(source, c
 
     local askAgain = false
     :: askAmount ::
-    local amountToBookKeep = lib.callback.await("visualz_accountant:requestBookKeepingData", tPlayer.source, doesCompanyExist.name, doesCompanyExist.percentage, tPlayer.getName(), askAgain)
+    local amountToBookKeep = lib.callback.await("visualz_accountant:requestBookKeepingData", tPlayer.source,
+        doesCompanyExist.name, doesCompanyExist.percentage, tPlayer.getName(), askAgain)
     if not amountToBookKeep then
         companyRequests[tPlayer.source] = nil
         TriggerClientEvent("ox_lib:notify", tPlayer.source, {
@@ -886,7 +924,8 @@ lib.callback.register("visualz_accountant:createBookKeeping", function(source, c
         timeout = 60,
     }
 
-    local response = lib.callback.await("visualz_accountant:companyBookKeepingResponse", xPlayer.source, tPlayer.getName(), doesCompanyExist.name, amountToBookKeep, doesCompanyExist.percentage)
+    local response = lib.callback.await("visualz_accountant:companyBookKeepingResponse", xPlayer.source,
+        tPlayer.getName(), doesCompanyExist.name, amountToBookKeep, doesCompanyExist.percentage)
 
     if not response then
         companyRequests[tPlayer.source] = nil
@@ -980,7 +1019,8 @@ lib.callback.register("visualz_accountant:createBookKeeping", function(source, c
         }
     end
 
-    local receivingAmount = ESX.Math.Round((100 - doesCompanyExist.percentage) * parsedCompanyAmount / Config.BookKeepingTime, 0)
+    local receivingAmount = ESX.Math.Round(
+        (100 - doesCompanyExist.percentage) * parsedCompanyAmount / Config.BookKeepingTime, 0)
     if receivingAmount <= 0 then
         companyRequests[tPlayer.source] = nil
         TriggerClientEvent("ox_lib:notify", tPlayer.source, {
@@ -1019,9 +1059,12 @@ lib.callback.register("visualz_accountant:createBookKeeping", function(source, c
 
     tPlayer.removeAccountMoney('black_money', parsedCompanyAmount)
 
-    local didBookKeepingProcessInsert = MySQL.insert.await('INSERT INTO `visualz_accountant_book_keeping` (company_id, accountant_identifier, amount_inserted, percentage, amount_receiving, ending_at, accountant) VALUES (?, ?, ?, ?, ?, ?, ?)', {
-        doesCompanyExist.id, xPlayer.identifier, parsedCompanyAmount, doesCompanyExist.percentage, receivingAmount, ending_at, accountantJob
-    })
+    local didBookKeepingProcessInsert = MySQL.insert.await(
+        'INSERT INTO `visualz_accountant_book_keeping` (company_id, accountant_identifier, amount_inserted, percentage, amount_receiving, ending_at, accountant) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        {
+            doesCompanyExist.id, xPlayer.identifier, parsedCompanyAmount, doesCompanyExist.percentage, receivingAmount,
+            ending_at, accountantJob
+        })
 
     if not didBookKeepingProcessInsert then
         companyRequests[tPlayer.source] = nil
@@ -1057,18 +1100,17 @@ lib.callback.register("visualz_accountant:createBookKeeping", function(source, c
         "**Virksomheds navn:** " .. doesCompanyExist.name .. "\n" ..
         "**Virksomheds CVR:** " .. doesCompanyExist.cvr .. "\n" ..
         "**Virksomheds procent:** " .. doesCompanyExist.percentage .. "\n\n" ..
-
         "**Bogføring:** " .. parsedCompanyAmount .. "\n" ..
         "**Udbetaling:** " .. receivingAmount .. "\n" ..
         "**Revisor udbetaling:** " .. accountantPayout .. "\n\n" ..
-
         "**Indsat d.** " .. os.date("%d/%m/%Y %H:%M:%S") .. "\n" ..
         "**Slutter d.** " .. endingFormat .. "\n\n" ..
 
         "**Revisor:** " .. xPlayer.getIdentifier() .. "\n" ..
         "**Kunde:** " .. doesCompanyExist.identifier .. "\n"
 
-    SendLog(Logs["CreateBookKeeping"], 2829617, "Opret bogførsel", message, "Visualz Development | Visualz.dk | " .. os.date("%d/%m/%Y %H:%M:%S"))
+    SendLog(Logs["CreateBookKeeping"], 2829617, "Opret bogførsel", message,
+        "Visualz Development | Visualz.dk | " .. os.date("%d/%m/%Y %H:%M:%S"))
 
     return {
         id = 'request_data',
@@ -1114,7 +1156,8 @@ function CalculateTimeInfo(startUnixTime, endUnixTime, currentUnixTime)
     end
 
     if minutes > 0 then
-        timeLeftString = timeLeftString .. minutes .. " minut" .. (minutes > 1 and "ter" or "") .. (seconds > 0 and ", " or "")
+        timeLeftString = timeLeftString ..
+            minutes .. " minut" .. (minutes > 1 and "ter" or "") .. (seconds > 0 and ", " or "")
     end
 
     if seconds > 0 then
