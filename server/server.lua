@@ -510,9 +510,9 @@ lib.callback.register("visualz_accountant:createCompany", function(source, compa
         return { type = 'error', description = 'Spilleren findes ikke', duration = 10000 }
     end
 
-    -- if tPlayer.source == xPlayer.source then
-    --     return { type = 'error', description = 'Du kan ikke oprette en virksomhed til dig selv' }
-    -- end
+    if tPlayer.source == xPlayer.source then
+        return { type = 'error', description = 'Du kan ikke oprette en virksomhed til dig selv' }
+    end
 
     if companyRequests[tPlayer.source] then
         return { type = 'error', description = 'Spilleren har allerede en forespørgsel' }
