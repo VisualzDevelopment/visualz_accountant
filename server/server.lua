@@ -45,11 +45,9 @@ lib.callback.register('visualz_accountant:getPlayersInformation', function(sourc
     for i = #players, 1, -1 do
         local xPlayer = ESX.GetPlayerFromId(players[i])
         if xPlayer then
-            local doesCompanyExist = MySQL.single.await(
-                'SELECT `identifier`, `name` FROM `visualz_accountant_company` WHERE `identifier` = ? AND `accountant` = ? AND `deleted` = 0 LIMIT 1',
-                {
-                    xPlayer.identifier, accountantJob
-                })
+            local doesCompanyExist = MySQL.single.await('SELECT `identifier`, `name` FROM `visualz_accountant_company` WHERE `identifier` = ? AND `accountant` = ? AND `deleted` = 0 LIMIT 1', {
+                xPlayer.identifier, accountantJob
+            })
 
             table.insert(playersInfo, {
                 source = xPlayer.source,
@@ -59,19 +57,6 @@ lib.callback.register('visualz_accountant:getPlayersInformation', function(sourc
             })
         end
     end
-
-    local doesCompanyExist = MySQL.single.await(
-        'SELECT `identifier`, `name` FROM `visualz_accountant_company` WHERE `identifier` = ? AND `accountant` = ? AND `deleted` = 0 LIMIT 1',
-        {
-            ESX.GetPlayerFromId(source).identifier, accountantJob
-        })
-
-    table.insert(playersInfo, {
-        source = source,
-        name = ESX.GetPlayerFromId(source).getName(),
-        hasCompany = doesCompanyExist ~= nil,
-        companyName = doesCompanyExist and doesCompanyExist.name or nil,
-    })
 
     return playersInfo
 end)
@@ -787,9 +772,9 @@ lib.callback.register("visualz_accountant:createBookKeeping", function(source, c
         return { type = 'error', description = 'Kunden er for langt væk eller findes ikke' }
     end
 
-    -- if tPlayer.source == xPlayer.source then
-    --     return { type = 'error', description = 'Du kan ikke oprette en virksomhed til dig selv' }
-    -- end
+    if tPlayer.source == xPlayer.source then
+        return { type = 'error', description = 'Du kan ikke bogføre for dig selv' }
+    end
 
     if companyRequests[tPlayer.source] then
         return { type = 'error', description = 'Spilleren har allerede en forespørgsel' }
