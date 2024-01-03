@@ -2,8 +2,8 @@ local companyRequests = {}
 
 if GetCurrentResourceName() ~= "visualz_accountant" then
     print("[" ..
-    GetCurrentResourceName() ..
-    "] ^1WARNING^7: This resource is not named 'visualz_accountant' but '" .. GetCurrentResourceName() .. "'")
+        GetCurrentResourceName() ..
+        "] ^1WARNING^7: This resource is not named 'visualz_accountant' but '" .. GetCurrentResourceName() .. "'")
     StopResource(GetCurrentResourceName())
 end
 
