@@ -215,7 +215,6 @@ function SearchForCompany()
     end
 
     local companies = lib.callback.await('visualz_accountant:searchCompanyByName', false, input[1])
-
     DisplayCompanies(companies)
 end
 
@@ -592,7 +591,7 @@ function OpenCompanyBookKeepingProcessList()
         })
     else
         table.insert(options, {
-            title = "Opdater sager",
+            title = "Opdater bogføringer",
             description = "Genopfrisk listen over aktive bogføringer",
             icon = "sync",
             onSelect = function()
@@ -865,15 +864,14 @@ lib.callback.register("visualz_accountant:companyBookKeepingResponse", function(
 
     local year, month, day, hour, minute, second = GetLocalTime()
 
-    local input = lib.inputDialog('Opret virksomheden',
-        {
-            { type = 'input',    label = 'Virksomheds ejer',    description = "Navnet på virksomheds ejeren",  icon = 'user',                                                                                 default = companyOwner,         disabled = true },
-            { type = 'input',    label = 'Virksomheds navn',    description = 'Navnet på virksomheden',        icon = 'building',                                                                             default = companyName,          disabled = true },
-            { type = 'number',   label = 'Procentsats',         description = 'Procentsats for bogføring.',    icon = 'percentage',                                                                           default = percentage,           disabled = true },
-            { type = 'number',   label = 'Bogførings beløb',    description = 'Beløb som kunden vil bogføre.', icon = 'sack-dollar',                                                                          default = amountToBookKeep,     disabled = true },
-            { type = 'date',     label = 'Dato for bogføring',  icon = { 'far', 'calendar' },                  default = year .. "/" .. month .. "/" .. day .. " " .. hour .. ":" .. minute .. ":" .. second, format = "DD/MM/YYYY hh:mm:ss", disabled = true },
-            { type = 'checkbox', label = 'Accepter bogføring?', description = "Godkender du bogføringen",      required = true },
-        })
+    local input = lib.inputDialog('Bogfør kontanter', {
+        { type = 'input',    label = 'Virksomheds ejer',    description = "Navnet på virksomheds ejeren",  icon = 'user',                                                                                 default = companyOwner,         disabled = true },
+        { type = 'input',    label = 'Virksomheds navn',    description = 'Navnet på virksomheden',        icon = 'building',                                                                             default = companyName,          disabled = true },
+        { type = 'number',   label = 'Procentsats',         description = 'Procentsats for bogføring.',    icon = 'percentage',                                                                           default = percentage,           disabled = true },
+        { type = 'number',   label = 'Bogførings beløb',    description = 'Beløb som kunden vil bogføre.', icon = 'sack-dollar',                                                                          default = amountToBookKeep,     disabled = true },
+        { type = 'date',     label = 'Dato for bogføring',  icon = { 'far', 'calendar' },                  default = year .. "/" .. month .. "/" .. day .. " " .. hour .. ":" .. minute .. ":" .. second, format = "DD/MM/YYYY hh:mm:ss", disabled = true },
+        { type = 'checkbox', label = 'Accepter bogføring?', description = "Godkender du bogføringen",      required = true },
+    })
 
     if input == nil then
         return false

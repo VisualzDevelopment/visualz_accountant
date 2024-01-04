@@ -13,7 +13,7 @@ Config.Accountants = {
     -- # Job: The job that can access the menu
     -- # IMPORTANT: This is used in the database to create the accountant tables
     -- #            If you need change this, please make sure to change it in the database as well (Ask support if you need help)
-    Job = "revisor",
+    Job = "police",
 
     -- # Percentage:
     -- # Description: The percentage that the accountant can set for the company (Between 0% and 100%)

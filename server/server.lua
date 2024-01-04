@@ -86,7 +86,7 @@ lib.callback.register('visualz_accountant:searchCompanyByName', function(source,
         return {}
     end
 
-    local companies = MySQL.rawExecute.await(
+    local companies = MySQL.query.await(
         'SELECT * FROM `visualz_accountant_company` WHERE `name` LIKE ? AND `accountant` = ?', {
             '%' .. name .. '%', accountantJob
         })
@@ -98,6 +98,7 @@ function FormatCompanies(companies)
     local formattedCompanies = companies
     :: continue ::
     for i = #companies, 1, -1 do
+        print(i)
         if companies[i].deleted == 1 then
             table.remove(formattedCompanies, i)
             goto continue
@@ -115,7 +116,10 @@ function FormatCompanies(companies)
 
         local created_at_number = tonumber(formattedCompanies[i].created_at)
 
+        print(created_at_number)
+
         if created_at_number then
+            print(created_at_number)
             formattedCompanies[i].created_at = os.date("%Y-%m-%d %H:%M:%S", math.floor(created_at_number) / 1000)
         end
 
