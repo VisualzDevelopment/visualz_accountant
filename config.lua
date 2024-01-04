@@ -1,25 +1,25 @@
 Config = {}
 
 -- # Book keeping time: (Black Money / Config.BookKeepingTime = Seconds)
--- # Example: (1.000.000 / 100) = 10000 Seconds / 166 Minutes / 2,76 Hours
+-- # Example: (1,000,000 / 100) = 10,000 Seconds / 166 Minutes / 2.76 Hours
 Config.BookKeepingTime = 100
 
 Config.Accountants = {
   {
     -- # Name: The name of the company
     -- # Description: The name that will be displayed in the menus
-    Name = "Revisor",
+    Name = "Auditor",
 
     -- # Job: The job that can access the menu
     -- # IMPORTANT: This is used in the database to create the accountant tables
-    -- #            If you need change this, please make sure to change it in the database as well (Ask support if you need help)
-    Job = "police",
+    -- #            If you need to change this, please make sure to change it in the database as well (Ask support if you need help)
+    Job = "revisor",
 
     -- # Percentage:
     -- # Description: The percentage that the accountant can set for the company (Between 0% and 100%)
     Percentage = {
-      min = 0,   -- Det laveste procent virksomheder kan hvidvask
-      max = 100, -- Det højeste procent virksomheder kan hvidvask
+      min = 0,   -- The minimum percentage companies can launder
+      max = 100, -- The maximum percentage companies can launder
     },
 
     -- # Blip: https://docs.fivem.net/docs/game-references/blips/
@@ -41,12 +41,12 @@ Config.Accountants = {
 
     -- # Boss Only: If true, only the boss can access the feature
     BossOnly = {
-      CreateCompany = true,     -- Opret virksomheder
-      DeleteCompany = true,     -- Slet virksomheder
-      EditCompany = true,       -- Rediger virksomheder
+      CreateCompany = false,     -- Create companies
+      DeleteCompany = false,     -- Delete companies
+      EditCompany = false,       -- Edit companies
 
-      CreateBookKeeping = true, -- Bogfør / hvidvask penge
-      PayoutBookKeeping = true, -- Udbetaling af hvidvasket penge
+      CreateBookKeeping = false, -- Record / launder money
+      PayoutBookKeeping = false, -- Payout laundered money
     }
   },
 }
