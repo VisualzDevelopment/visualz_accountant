@@ -31,6 +31,61 @@ CreateThread(function()
     end
 end)
 
+
+MySQL.ready(function()
+    MySQL.query('SHOW TABLES LIKE \'visualz_accountant_book_keeping\'', {}, function(tableExists)
+        if not tableExists or #tableExists == 0 then
+            local createTableResponse = MySQL.Sync.execute(
+                'CREATE TABLE IF NOT EXISTS `visualz_accountant_book_keeping` (' ..
+                '`id` int(11) NOT NULL AUTO_INCREMENT,' ..
+                '`company_id` int(11) NOT NULL,' ..
+                '`accountant` varchar(255) NOT NULL,' ..
+                '`accountant_identifier` varchar(255) NOT NULL,' ..
+                '`percentage` int(11) NOT NULL,' ..
+                '`amount_inserted` int(11) NOT NULL,' ..
+                '`amount_receiving` int(11) NOT NULL,' ..
+                '`created_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),' ..
+                '`ending_at` timestamp NOT NULL DEFAULT current_timestamp(),' ..
+                '`completed` int(11) NOT NULL DEFAULT 0,' ..
+                'PRIMARY KEY (`id`)' ..
+                ') ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci',
+                {})
+            if createTableResponse then
+                print("[" .. GetCurrentResourceName() .. "] ^2SUCCESS^7: Created table 'visualz_accountant_book_keeping'")
+            else
+                print("[" .. GetCurrentResourceName() .. "] ^1ERROR^7: Could not create table 'visualz_accountant_book_keeping'")
+            end
+        end
+    end)
+
+    MySQL.query('SHOW TABLES LIKE \'visualz_accountant_company\'', {}, function(tableExists)
+        if not tableExists or #tableExists == 0 then
+            local createTableResponse = MySQL.Sync.execute(
+                'CREATE TABLE IF NOT EXISTS `visualz_accountant_company` (' ..
+                '`id` int(11) NOT NULL AUTO_INCREMENT,' ..
+                '`identifier` varchar(255) NOT NULL,' ..
+                '`name` varchar(255) NOT NULL,' ..
+                '`cvr` int(11) NOT NULL,' ..
+                '`percentage` int(11) NOT NULL,' ..
+                '`accountant_identifier` varchar(255) NOT NULL,' ..
+                '`accountant` varchar(255) NOT NULL,' ..
+                '`money_washed` int(11) NOT NULL DEFAULT 0,' ..
+                '`deleted` int(11) NOT NULL DEFAULT 0,' ..
+                '`created_at` timestamp NOT NULL DEFAULT current_timestamp(),' ..
+                'PRIMARY KEY (`id`)' ..
+                ') ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci',
+                {})
+
+            if createTableResponse then
+                print("[" .. GetCurrentResourceName() .. "] ^2SUCCESS^7: Created table 'visualz_accountant_company'")
+            else
+                print("[" .. GetCurrentResourceName() .. "] ^1ERROR^7: Could not create table 'visualz_accountant_company'")
+            end
+        end
+    end)
+end)
+
+
 lib.callback.register('visualz_accountant:getPlayersInformation', function(source, players)
     local xPlayer = ESX.GetPlayerFromId(source)
 
