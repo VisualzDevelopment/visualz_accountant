@@ -10,4 +10,4 @@ shared_script { "@es_extended/imports.lua", "@ox_lib/init.lua", "config.lua" }
 client_scripts { "client/client.lua" }
 server_scripts { "@oxmysql/lib/MySQL.lua", "server/server.lua", "server/logs.lua" }
 
-escrow_ignore { "server/logs.lua" }
+escrow_ignore { "server/logs.lua", "config.lua" }
