@@ -1,9 +1,8 @@
 local companyRequests = {}
 
 if GetCurrentResourceName() ~= "visualz_accountant" then
-    print("[" ..
-        GetCurrentResourceName() ..
-        "] ^1WARNING^7: This resource is not named 'visualz_accountant' but '" .. GetCurrentResourceName() .. "'")
+    print("[" .. GetCurrentResourceName() .. "] ^1WARNING^7: This resource is not named 'visualz_accountant' but '" .. GetCurrentResourceName() .. "'")
+    Wait(100)
     StopResource(GetCurrentResourceName())
 end
 
@@ -90,7 +89,6 @@ lib.callback.register('visualz_accountant:getPlayersInformation', function(sourc
     local xPlayer = ESX.GetPlayerFromId(source)
 
     local accountantJob = GetAccountantJob(xPlayer, "CreateCompany")
-
     if not accountantJob then
         return {}
     end
@@ -112,6 +110,17 @@ lib.callback.register('visualz_accountant:getPlayersInformation', function(sourc
             })
         end
     end
+
+    local doesCompanyExist = MySQL.single.await('SELECT `identifier`, `name` FROM `visualz_accountant_company` WHERE `identifier` = ? AND `accountant` = ? AND `deleted` = 0 LIMIT 1', {
+        xPlayer.identifier, accountantJob
+    })
+
+    table.insert(playersInfo, {
+        source = xPlayer.source,
+        name = xPlayer.getName(),
+        hasCompany = doesCompanyExist ~= nil,
+        companyName = doesCompanyExist and doesCompanyExist.name or nil,
+    })
 
     return playersInfo
 end)
@@ -153,7 +162,6 @@ function FormatCompanies(companies)
     local formattedCompanies = companies
     :: continue ::
     for i = #companies, 1, -1 do
-        print(i)
         if companies[i].deleted == 1 then
             table.remove(formattedCompanies, i)
             goto continue
@@ -171,10 +179,8 @@ function FormatCompanies(companies)
 
         local created_at_number = tonumber(formattedCompanies[i].created_at)
 
-        print(created_at_number)
 
         if created_at_number then
-            print(created_at_number)
             formattedCompanies[i].created_at = os.date("%Y-%m-%d %H:%M:%S", math.floor(created_at_number) / 1000)
         end
 
@@ -544,7 +550,6 @@ lib.callback.register("visualz_accountant:createCompany", function(source, compa
     local xPlayer = ESX.GetPlayerFromId(source)
 
     local accountantJob = GetAccountantJob(xPlayer, "CreateCompany")
-
     if not accountantJob then
         return { type = 'error', description = 'Du har ikke adgang til denne funktion' }
     end
@@ -802,16 +807,13 @@ lib.callback.register("visualz_accountant:createBookKeeping", function(source, c
     local xPlayer = ESX.GetPlayerFromId(source)
 
     local accountantJob = GetAccountantJob(xPlayer, "CreateBookKeeping")
-
     if not accountantJob then
         return { type = 'error', description = 'Du har ikke adgang til denne funktion' }
     end
 
-    local tPlayerIdentifier = MySQL.single.await(
-        'SELECT `identifier` FROM `visualz_accountant_company` WHERE `id` = ? AND `accountant` = ? AND `deleted` = 0 LIMIT 1',
-        {
-            companyId, accountantJob
-        })
+    local tPlayerIdentifier = MySQL.single.await('SELECT `identifier` FROM `visualz_accountant_company` WHERE `id` = ? AND `accountant` = ? AND `deleted` = 0 LIMIT 1', {
+        companyId, accountantJob
+    })
 
     if not tPlayerIdentifier then
         return { type = 'error', description = 'Kunden er for langt væk eller findes ikke' }
@@ -820,6 +822,10 @@ lib.callback.register("visualz_accountant:createBookKeeping", function(source, c
     local tPlayer = ESX.GetPlayerFromIdentifier(tPlayerIdentifier.identifier)
     if not tPlayer then
         return { type = 'error', description = 'Kunden er for langt væk eller findes ikke' }
+    end
+
+    if tPlayer.source == xPlayer.source then
+        return { type = 'error', description = 'Du kan ikke bogføre for dig selv' }
     end
 
     local xPlayerCoords = xPlayer.getCoords(true)
@@ -831,19 +837,13 @@ lib.callback.register("visualz_accountant:createBookKeeping", function(source, c
         return { type = 'error', description = 'Kunden er for langt væk eller findes ikke' }
     end
 
-    if tPlayer.source == xPlayer.source then
-        return { type = 'error', description = 'Du kan ikke bogføre for dig selv' }
-    end
-
     if companyRequests[tPlayer.source] then
         return { type = 'error', description = 'Spilleren har allerede en forespørgsel' }
     end
 
-    local doesCompanyExist = MySQL.single.await(
-        'SELECT * FROM `visualz_accountant_company` WHERE `identifier` = ? AND `accountant` = ? AND `deleted` = 0 LIMIT 1',
-        {
-            tPlayer.identifier, accountantJob
-        })
+    local doesCompanyExist = MySQL.single.await('SELECT * FROM `visualz_accountant_company` WHERE `identifier` = ? AND `accountant` = ? AND `deleted` = 0 LIMIT 1', {
+        tPlayer.identifier, accountantJob
+    })
 
     if not doesCompanyExist then
         return { type = 'error', description = 'Spilleren har ikke en virksomhed' }
@@ -874,8 +874,7 @@ lib.callback.register("visualz_accountant:createBookKeeping", function(source, c
 
     local askAgain = false
     :: askAmount ::
-    local amountToBookKeep = lib.callback.await("visualz_accountant:requestBookKeepingData", tPlayer.source,
-        doesCompanyExist.name, doesCompanyExist.percentage, tPlayer.getName(), askAgain)
+    local amountToBookKeep = lib.callback.await("visualz_accountant:requestBookKeepingData", tPlayer.source, doesCompanyExist.name, doesCompanyExist.percentage, tPlayer.getName(), askAgain)
     if not amountToBookKeep then
         companyRequests[tPlayer.source] = nil
         TriggerClientEvent("ox_lib:notify", tPlayer.source, {
@@ -968,8 +967,7 @@ lib.callback.register("visualz_accountant:createBookKeeping", function(source, c
         timeout = 60,
     }
 
-    local response = lib.callback.await("visualz_accountant:companyBookKeepingResponse", xPlayer.source,
-        tPlayer.getName(), doesCompanyExist.name, amountToBookKeep, doesCompanyExist.percentage)
+    local response = lib.callback.await("visualz_accountant:companyBookKeepingResponse", xPlayer.source, tPlayer.getName(), doesCompanyExist.name, amountToBookKeep, doesCompanyExist.percentage)
 
     if not response then
         companyRequests[tPlayer.source] = nil
@@ -996,7 +994,6 @@ lib.callback.register("visualz_accountant:createBookKeeping", function(source, c
         }
     end
 
-    -- New
     local companyAmount = tonumber(amountToBookKeep)
     if not companyAmount then
         companyRequests[tPlayer.source] = nil
@@ -1013,8 +1010,8 @@ lib.callback.register("visualz_accountant:createBookKeeping", function(source, c
             position = 'top',
         }
     end
-    local parsedCompanyAmount = ESX.Math.Round(companyAmount, 0)
 
+    local parsedCompanyAmount = ESX.Math.Round(companyAmount, 0)
     if not type(parsedCompanyAmount) == "number" then
         companyRequests[tPlayer.source] = nil
         TriggerClientEvent("ox_lib:notify", tPlayer.source, {
@@ -1063,8 +1060,7 @@ lib.callback.register("visualz_accountant:createBookKeeping", function(source, c
         }
     end
 
-    local receivingAmount = ESX.Math.Round(
-        (100 - doesCompanyExist.percentage) * parsedCompanyAmount / Config.BookKeepingTime, 0)
+    local receivingAmount = ESX.Math.Round((100 - doesCompanyExist.percentage) * parsedCompanyAmount / Config.BookKeepingTime, 0)
     if receivingAmount <= 0 then
         companyRequests[tPlayer.source] = nil
         TriggerClientEvent("ox_lib:notify", tPlayer.source, {
@@ -1081,7 +1077,28 @@ lib.callback.register("visualz_accountant:createBookKeeping", function(source, c
         }
     end
 
-    local ending_at_time = os.time() + ESX.Math.Round(parsedCompanyAmount / Config.BookKeepingTime, 0)
+    local lastBookKeeping = MySQL.single.await('SELECT `ending_at`, `created_at` FROM `visualz_accountant_book_keeping` WHERE `company_id` = ? AND `accountant` = ? AND completed = 0 ORDER BY `ending_at` DESC LIMIT 1', {
+        doesCompanyExist.id, accountantJob
+    })
+
+    local ending_at_time
+
+    if not lastBookKeeping then
+        ending_at_time = os.time() + ESX.Math.Round(parsedCompanyAmount / Config.BookKeepingTime, 0)
+    else
+        local currentUnixTime = os.time()
+        local startUnixTime = lastBookKeeping.created_at / 1000
+        local endUnixTime = lastBookKeeping.ending_at / 1000
+        local totalTime = endUnixTime - startUnixTime
+        local timeLeft = endUnixTime - currentUnixTime
+
+        if timeLeft < totalTime then
+            ending_at_time = os.time() + ESX.Math.Round(parsedCompanyAmount / Config.BookKeepingTime, 0) + timeLeft
+        else
+            ending_at_time = os.time() + ESX.Math.Round(parsedCompanyAmount / Config.BookKeepingTime, 0)
+        end
+    end
+
     local ending_at = os.date("%Y-%m-%d %H:%M:%S", ending_at_time)
 
     local hasEnoughMoney = tPlayer.getAccount('black_money').money >= parsedCompanyAmount
@@ -1164,7 +1181,6 @@ lib.callback.register("visualz_accountant:createBookKeeping", function(source, c
     }
 end)
 
--- Function to generate a random CVR number
 function GenerateRandomEightDigitNumber()
     local randomEightDigitNumber = math.random(10000000, 99999999)
     return randomEightDigitNumber
@@ -1174,7 +1190,6 @@ function CalculateTimeInfo(startUnixTime, endUnixTime, currentUnixTime)
     local totalTime = endUnixTime - startUnixTime
     local elapsedTime = currentUnixTime - startUnixTime
 
-    -- Ensure the current time is within the given range
     if currentUnixTime <= startUnixTime then
         elapsedTime = 0
     elseif currentUnixTime >= endUnixTime then
