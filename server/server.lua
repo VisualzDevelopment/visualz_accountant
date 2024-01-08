@@ -111,17 +111,6 @@ lib.callback.register('visualz_accountant:getPlayersInformation', function(sourc
         end
     end
 
-    local doesCompanyExist = MySQL.single.await('SELECT `identifier`, `name` FROM `visualz_accountant_company` WHERE `identifier` = ? AND `accountant` = ? AND `deleted` = 0 LIMIT 1', {
-        xPlayer.identifier, accountantJob
-    })
-
-    table.insert(playersInfo, {
-        source = xPlayer.source,
-        name = xPlayer.getName(),
-        hasCompany = doesCompanyExist ~= nil,
-        companyName = doesCompanyExist and doesCompanyExist.name or nil,
-    })
-
     return playersInfo
 end)
 
