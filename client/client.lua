@@ -723,7 +723,7 @@ end
 -- Customer Request - Accept/Decline dialog and company name input
 lib.callback.register("visualz_accountant:requestCompanyData", function()
     if lib.getOpenContextMenu() ~= nil then
-        lib.closeContext()
+        lib.hideContext()
     end
 
     if lib.getOpenMenu() ~= nil then
@@ -766,7 +766,7 @@ end)
 -- Accountant Request - Accept/Decline the company name the customer has entered
 lib.callback.register("visualz_accountant:companyDataResponse", function(companyOwner, companyName)
     if lib.getOpenContextMenu() ~= nil then
-        lib.closeContext()
+        lib.hideContext()
     end
 
     if lib.getOpenMenu() ~= nil then
@@ -799,7 +799,7 @@ end)
 -- Customer Request - Accept/Decline dialog and company name input
 lib.callback.register("visualz_accountant:requestBookKeepingData", function(companyName, percentage, ownerName, askAgain)
     if lib.getOpenContextMenu() ~= nil then
-        lib.closeContext()
+        lib.hideContext()
     end
 
     if lib.getOpenMenu() ~= nil then
@@ -850,7 +850,7 @@ end)
 -- Accountant Request - Accept/Decline the company name the customer has entered
 lib.callback.register("visualz_accountant:companyBookKeepingResponse", function(companyOwner, companyName, amountToBookKeep, percentage)
     if lib.getOpenContextMenu() ~= nil then
-        lib.closeContext()
+        lib.hideContext()
     end
 
     if lib.getOpenMenu() ~= nil then

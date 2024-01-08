@@ -792,8 +792,7 @@ lib.callback.register("visualz_accountant:createCompany", function(source, compa
         "**Revisor:** " .. xPlayer.getIdentifier() .. "\n" ..
         "**Kunde:** " .. tPlayer.getIdentifier() .. "\n"
 
-    SendLog(Logs["CreateCompany"], 2829617, "Oprettet virksomhed", message,
-        "Visualz Development | Visualz.dk | " .. os.date("%d/%m/%Y %H:%M:%S"))
+    SendLog(Logs["CreateCompany"], 2829617, "Oprettet virksomhed", message, "Visualz Development | Visualz.dk | " .. os.date("%d/%m/%Y %H:%M:%S"))
 
     return {
         id = 'request_data',
