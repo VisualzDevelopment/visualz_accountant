@@ -1089,7 +1089,19 @@ lib.callback.register("visualz_accountant:createBookKeeping", function(source, c
 
     local ending_at = os.date("%Y-%m-%d %H:%M:%S", ending_at_time)
 
-    local hasEnoughMoney = tPlayer.getAccount('black_money').money >= parsedCompanyAmount
+    local companyConfig = nil
+    for _, accountant in pairs(Config.Accountants) do
+        if accountant.Job == accountantJob then
+            companyConfig = accountant
+            break
+        end
+    end
+
+    if not companyConfig then
+        return { type = 'error', description = 'Der skete en fejl' }
+    end
+
+    local hasEnoughMoney = tPlayer.getAccount(companyConfig.MoneyType).money >= parsedCompanyAmount
     if not hasEnoughMoney then
         companyRequests[tPlayer.source] = nil
         TriggerClientEvent("ox_lib:notify", tPlayer.source, {
@@ -1106,7 +1118,9 @@ lib.callback.register("visualz_accountant:createBookKeeping", function(source, c
         }
     end
 
-    tPlayer.removeAccountMoney('black_money', parsedCompanyAmount)
+
+
+    tPlayer.removeAccountMoney(companyConfig.MoneyType, parsedCompanyAmount)
 
     local didBookKeepingProcessInsert = MySQL.insert.await(
         'INSERT INTO `visualz_accountant_book_keeping` (company_id, accountant_identifier, amount_inserted, percentage, amount_receiving, ending_at, accountant) VALUES (?, ?, ?, ?, ?, ?, ?)',

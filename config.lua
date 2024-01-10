@@ -15,6 +15,10 @@ Config.Accountants = {
     -- #            If you need to change this, please make sure to change it in the database as well (Ask support if you need help)
     Job = "revisor",
 
+    -- # Money type: The type of money that will be laundered
+    -- # Description: Can only be "black_money" or "money"
+    MoneyType = "black_money",
+
     -- # Percentage:
     -- # Description: The percentage that the accountant can set for the company (Between 0% and 100%)
     Percentage = {
