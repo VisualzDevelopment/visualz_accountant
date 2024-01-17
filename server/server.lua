@@ -1048,7 +1048,7 @@ lib.callback.register("visualz_accountant:createBookKeeping", function(source, c
         }
     end
 
-    local receivingAmount = ESX.Math.Round((100 - doesCompanyExist.percentage) * parsedCompanyAmount / Config.BookKeepingTime, 0)
+    local receivingAmount = ESX.Math.Round((100 - doesCompanyExist.percentage) * parsedCompanyAmount / 100, 0)
     if receivingAmount <= 0 then
         companyRequests[tPlayer.source] = nil
         TriggerClientEvent("ox_lib:notify", tPlayer.source, {
