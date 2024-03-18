@@ -1080,7 +1080,7 @@ lib.callback.register("visualz_accountant:createBookKeeping", function(source, c
         local totalTime = endUnixTime - startUnixTime
         local timeLeft = endUnixTime - currentUnixTime
 
-        if timeLeft < totalTime then
+        if timeLeft < totalTime and timeLeft > 0 then
             ending_at_time = os.time() + ESX.Math.Round(parsedCompanyAmount / Config.BookKeepingTime, 0) + timeLeft
         else
             ending_at_time = os.time() + ESX.Math.Round(parsedCompanyAmount / Config.BookKeepingTime, 0)
@@ -1191,6 +1191,10 @@ end
 function CalculateTimeInfo(startUnixTime, endUnixTime, currentUnixTime)
     local totalTime = endUnixTime - startUnixTime
     local elapsedTime = currentUnixTime - startUnixTime
+
+    if startUnixTime == endUnixTime then
+        return 100, "0 sekunder"
+    end
 
     if currentUnixTime <= startUnixTime then
         elapsedTime = 0
